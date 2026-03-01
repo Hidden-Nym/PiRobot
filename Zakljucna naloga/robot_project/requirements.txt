@@ -1,0 +1,7 @@
+opencv-python==4.9.0.80
+numpy>=1.26.0
+lgpio>=0.2.2.0
+SpeechRecognition>=3.10.0
+PyAudio>=0.2.14
+ultralytics>=8.1.0
+picamera2>=0.3.17
