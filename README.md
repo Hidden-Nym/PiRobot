@@ -359,3 +359,10 @@ git push
 
 1. Na Macu: `scp datoteka matija@192.168.1.26:/home/matija/robot_project/`
 2. Na RPi: `git add -A && git commit -m "opis" && git push`
+
+
+
+za test v venv (cd /home/matija/robot_project
+source venv/bin/activate
+python3 main.py
+)
