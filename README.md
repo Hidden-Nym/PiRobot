@@ -344,3 +344,18 @@ Projekt demonstrira praktično uporabo:
 ---
 
 *Zaključna naloga | Raspberry Pi 5 Robot*
+
+
+Ko spremeniš kodo na RPi, samo te 3 ukaze:
+
+```bash
+cd /home/matija/robot_project
+git add -A
+git commit -m "opis spremembe"
+git push
+```
+
+Če pa spremeniš na **Macu** in hočeš prenesti na RPi:
+
+1. Na Macu: `scp datoteka matija@192.168.1.26:/home/matija/robot_project/`
+2. Na RPi: `git add -A && git commit -m "opis" && git push`
