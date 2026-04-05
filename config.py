@@ -192,4 +192,4 @@ SPEECH_PHRASE_LIMIT = 10            # Maks. dolžina fraze (sekunde)
 YOLO_MODEL = "yolov8n.pt"          # YOLOv8 nano model
 YOLO_CONFIDENCE = 0.5              # Minimalna zanesljivost detekcije
 YOLO_ENABLED = True                # Omogoči YOLO kot backup
-// testni komentar za pogled
+# testni komentar za pogled
