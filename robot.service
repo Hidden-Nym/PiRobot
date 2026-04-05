@@ -1,0 +1,13 @@
+[Unit]
+Description=Robot Object Detection
+After=multi-user.target
+
+[Service]
+Type=forking
+User=matija
+ExecStart=/bin/bash /home/matija/robot_project/start_robot.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+

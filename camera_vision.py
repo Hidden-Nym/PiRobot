@@ -69,7 +69,7 @@ class CameraVision:
 
     def __init__(self):
         """Odpre kamero in pripravi zajem."""
-        self.cap = cv2.VideoCapture(config.CAMERA_INDEX)
+        self.cap = cv2.VideoCapture(config.CAMERA_INDEX, cv2.CAP_V4L2)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.CAMERA_WIDTH)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.CAMERA_HEIGHT)
         self.cap.set(cv2.CAP_PROP_FPS, config.CAMERA_FPS)
