@@ -10,11 +10,12 @@ Uporaba:
     python3 main.py --demo       # Demo: najdi rdečo kocko
 
 Podprti glasovni ukazi:
-    SL: "najdi rdečo kocko", "najdi modri trikotnik", "ustavi"
-    EN: "find red cube", "find blue triangle", "stop"
+    SL: "najdi rdečo kocko", "najdi modri trikotnik", "ustavi", "pavza", "nadaljuj"
+    EN: "find red cube", "find blue triangle", "stop", "pause", "resume"
 """
 
 import sys
+import time
 import signal
 import select
 import threading
@@ -46,19 +47,55 @@ class Robot:
 
         self._running = False
         self._paused = False
+        self._nav_thread = None
+        self._last_nav_color = None
+        self._last_nav_shape = None
         print("")
         print("Vsi moduli inicializirani. Robot pripravljen.")
         print("")
 
+    def _start_navigation(self, color, shape):
+        """Zažene navigacijo v ločeni niti, da glavna zanka ostane odzivna."""
+        # Ustavi morebitno prejšnjo navigacijo
+        if self._nav_thread and self._nav_thread.is_alive():
+            self.navigator.stop()
+            self._nav_thread.join(timeout=2)
+
+        color_display = config.COLOR_DISPLAY_NAMES.get(color, color)
+        shape_display = ""
+        if shape:
+            shape_display = " " + config.SHAPE_DISPLAY_NAMES.get(shape, shape)
+
+        def nav_task():
+            success = self.navigator.navigate_to_object(
+                target_color=color,
+                target_shape=shape,
+            )
+            if success:
+                print("")
+                print(f"[ROBOT] USPEH! {color_display}{shape_display} "
+                      f"dosežen in dotaknjen.")
+                print("[ROBOT] Premor 5 sekund...")
+                time.sleep(5)
+            else:
+                print("")
+                print(f"[ROBOT] NEUSPEH. {color_display}{shape_display} "
+                      f"ni bil najden.")
+            print("")
+            print("Čakam na naslednji ukaz...")
+            print("")
+
+        self._nav_thread = threading.Thread(target=nav_task, daemon=True)
+        self._nav_thread.start()
+
     def _handle_command(self, command):
         """
-        Obdela glasovni ukaz.
-
-        Args:
-            command: Command objekt iz speech recognition modula.
+        Obdela ukaz. Navigacija teče v ločeni niti, zato so
+        pavza/ustavi/nadaljuj takoj odzivni.
         """
         if command.action == "ustavi":
             print("[ROBOT] Ukaz: USTAVI")
+            self._paused = False
             self.navigator.stop()
             return
 
@@ -69,8 +106,17 @@ class Robot:
             return
 
         if command.action == "nadaljuj":
+            if not self._paused:
+                print("[ROBOT] Robot ni na pavzi.")
+                return
             self._paused = False
-            print("[ROBOT] Nadaljevanje. Čakam na ukaz...")
+            if self._last_nav_color:
+                color_display = config.COLOR_DISPLAY_NAMES.get(
+                    self._last_nav_color, self._last_nav_color)
+                print(f"[ROBOT] Nadaljujem iskanje: {color_display}")
+                self._start_navigation(self._last_nav_color, self._last_nav_shape)
+            else:
+                print("[ROBOT] Nadaljevanje. Čakam na ukaz...")
             return
 
         if self._paused:
@@ -95,30 +141,13 @@ class Robot:
             print(f"[ROBOT] Ukaz: Najdi {color_display}{shape_display}")
             print("")
 
-            # Zaženi navigacijo
-            success = self.navigator.navigate_to_object(
-                target_color=command.color,
-                target_shape=command.shape,
-            )
+            self._last_nav_color = command.color
+            self._last_nav_shape = command.shape
+            self._start_navigation(command.color, command.shape)
 
-            if success:
-                print("")
-                print(f"[ROBOT] USPEH! {color_display}{shape_display} "
-                      f"dosežen in dotaknjen.")
-                import time
-                print("[ROBOT] Premor 5 sekund...")
-                time.sleep(5)
-            else:
-                print("")
-                print(f"[ROBOT] NEUSPEH. {color_display}{shape_display} "
-                      f"ni bil najden.")
-
-            print("")
-            print("Čakam na naslednji ukaz...")
-            print("")
         else:
             print(f"[ROBOT] Nerazumljen ukaz: '{command.raw_text}'")
-            print("        Podprti ukazi: 'najdi [barva] [oblika]', 'ustavi'")
+            print("        Podprti ukazi: 'najdi [barva] [oblika]', 'ustavi', 'pavza', 'nadaljuj'")
 
     def run(self):
         """Glavni cikel: posluša glasovne ukaze in jih izvaja."""
@@ -134,6 +163,7 @@ class Robot:
         print("  EN: 'find red cube'")
         print("  EN: 'find blue triangle'")
         print("  Ustavi: 'ustavi' ali 'stop'")
+        print("  Pavza:  'pavza' | Nadaljuj: 'nadaljuj'")
         print("")
 
         while self._running:
@@ -159,6 +189,7 @@ class Robot:
         print("  'najdi modri trikotnik'")
         print("  'find red cube'")
         print("  'ustavi' ali 'q'")
+        print("  'pavza' | 'nadaljuj'")
         print("")
 
         while self._running:
@@ -169,10 +200,11 @@ class Robot:
                 if text.lower() in ("q", "quit", "exit"):
                     break
 
-                # Ročno parsaj ukaz
                 command = self.speech._parse_command(text)
                 print(f"  Parsano: {command}")
                 self._handle_command(command)
+                if command.action == "ustavi":
+                    self._running = False
 
             except EOFError:
                 break
@@ -208,6 +240,7 @@ class Robot:
         print("  'najdi modri trikotnik'")
         print("  'find red cube'")
         print("  'ustavi' ali 'q'")
+        print("  'pavza' | 'nadaljuj'")
         print("")
 
         while self._running:
@@ -222,7 +255,6 @@ class Robot:
 
                 # Mikrofon ni ujel govora — ponudi tipkovnico
                 print("[TIPKOVNICA] Vtipkaj ukaz ali pritisni Enter za nadaljevanje poslušanja:")
-                # Čakaj 7 sekund na tipkovnico
                 if select.select([sys.stdin], [], [], 7.0)[0]:
                     try:
                         text = sys.stdin.readline().strip()
@@ -285,6 +317,8 @@ class Robot:
         print("Zaustavljam robota...")
         self._running = False
         self.navigator.stop()
+        if self._nav_thread and self._nav_thread.is_alive():
+            self._nav_thread.join(timeout=2)
         self.motors.cleanup()
         self.camera.cleanup()
         self.sensor.cleanup()
