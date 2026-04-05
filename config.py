@@ -24,8 +24,8 @@ ULTRASONIC_ECHO = 18    # Echo pin (Pin 12) - POTREBUJE napetostni delilnik!
 # ============================================================
 
 PWM_FREQUENCY = 1000    # PWM frekvenca v Hz
-MOTOR_SPEED = 60        # Privzeta hitrost (0-100%)
-TURN_SPEED = 50         # Hitrost med obračanjem (0-100%)
+MOTOR_SPEED = 75        # Privzeta hitrost (0-100%)
+TURN_SPEED = 75         # Hitrost med obračanjem (0-100%)
 SLOW_SPEED = 35         # Počasna hitrost za fino približevanje
 
 # ============================================================
