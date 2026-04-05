@@ -43,16 +43,16 @@ class UltrasonicSensor:
         # Čakaj na začetek ECHO signala (prehod na HIGH)
         timeout_start = time.time()
         while lgpio.gpio_read(self.chip, config.ULTRASONIC_ECHO) == 0:
-            pulse_start = time.time()
-            if pulse_start - timeout_start > config.ULTRASONIC_TIMEOUT:
+            if time.time() - timeout_start > config.ULTRASONIC_TIMEOUT:
                 return None  # Timeout
+        pulse_start = time.time()
 
         # Čakaj na konec ECHO signala (prehod na LOW)
         timeout_start = time.time()
         while lgpio.gpio_read(self.chip, config.ULTRASONIC_ECHO) == 1:
-            pulse_end = time.time()
-            if pulse_end - timeout_start > config.ULTRASONIC_TIMEOUT:
+            if time.time() - timeout_start > config.ULTRASONIC_TIMEOUT:
                 return None  # Timeout
+        pulse_end = time.time()
 
         # Izračunaj razdaljo
         # Zvok potuje 343 m/s, razdalja = čas * hitrost / 2 (tja in nazaj)
