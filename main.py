@@ -45,6 +45,7 @@ class Robot:
         self.navigator = Navigator(self.motors, self.camera, self.sensor)
 
         self._running = False
+        self._paused = False
         print("")
         print("Vsi moduli inicializirani. Robot pripravljen.")
         print("")
@@ -59,6 +60,21 @@ class Robot:
         if command.action == "ustavi":
             print("[ROBOT] Ukaz: USTAVI")
             self.navigator.stop()
+            return
+
+        if command.action == "pavza":
+            self._paused = True
+            self.navigator.stop()
+            print("[ROBOT] PAVZA. Reci 'nadaljuj' za nadaljevanje.")
+            return
+
+        if command.action == "nadaljuj":
+            self._paused = False
+            print("[ROBOT] Nadaljevanje. Čakam na ukaz...")
+            return
+
+        if self._paused:
+            print("[ROBOT] Robot je na pavzi. Reci 'nadaljuj' za nadaljevanje.")
             return
 
         if command.action == "najdi":

@@ -171,7 +171,7 @@ ULTRASONIC_SAMPLE_DELAY = 0.01  # Zamik med meritvami (sekunde)
 
 TARGET_DISTANCE_CM = 3.5        # Razdalja do objekta za "dotik" (cm)
 SEARCH_TURN_DURATION = 0.3      # Trajanje obrata med iskanjem (sekunde)
-MAX_SEARCH_ROTATIONS = 12       # Maks. št. obratov pri iskanju (360°)
+MAX_SEARCH_ROTATIONS = 15       # Maks. št. obratov pri iskanju (360°)
 
 # P-regulator za krmiljenje smeri
 KP_STEERING = 0.8              # Proporcionalni koeficient za korekcijo smeri

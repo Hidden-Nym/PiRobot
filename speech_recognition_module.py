@@ -65,6 +65,16 @@ class SpeechRecognizer:
         if any(word in words for word in stop_words):
             return Command(action="ustavi", raw_text=text)
 
+        # Preveri ukaz za pavzo
+        pause_words = ["pavza", "pause", "počakaj", "pocakaj"]
+        if any(word in words for word in pause_words):
+            return Command(action="pavza", raw_text=text)
+
+        # Preveri ukaz za nadaljevanje
+        resume_words = ["nadaljuj", "resume", "naprej", "začni", "zacni"]
+        if any(word in words for word in resume_words):
+            return Command(action="nadaljuj", raw_text=text)
+
         # Preveri ukaz za iskanje
         find_words = ["najdi", "poišči", "poisci", "išči", "isci",
                        "find", "search", "look", "get"]
