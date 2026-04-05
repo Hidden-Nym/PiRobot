@@ -169,7 +169,7 @@ ULTRASONIC_SAMPLE_DELAY = 0.01  # Zamik med meritvami (sekunde)
 # NAVIGACIJA
 # ============================================================
 
-TARGET_DISTANCE_CM = 3.0        # Razdalja do objekta za "dotik" (cm)
+TARGET_DISTANCE_CM = 3.5        # Razdalja do objekta za "dotik" (cm)
 SEARCH_TURN_DURATION = 0.3      # Trajanje obrata med iskanjem (sekunde)
 MAX_SEARCH_ROTATIONS = 12       # Maks. št. obratov pri iskanju (360°)
 
