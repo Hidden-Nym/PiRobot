@@ -113,3 +113,4 @@ if __name__ == "__main__":
         print("\nPrekinjen s Ctrl+C")
     finally:
         sensor.cleanup()
+#test commit
