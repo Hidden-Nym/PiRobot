@@ -309,6 +309,21 @@ python3 main.py --demo
 python3 main.py --demo --color modra --shape trikotnik
 ```
 
+### 6.5 Nadzor z tmux
+
+Robot teče v tmux seji z imenom `robot`. Uporabne ukaze:
+
+```bash
+# Preveri ali robot teče
+tmux ls
+
+# Priklopi se na sejo in vidi izhod programa
+tmux attach -t robot
+
+# Izhod iz seje brez zaustavitve programa
+# Ctrl+B, nato D
+```
+
 ---
 
 ## 7. Kalibracija
