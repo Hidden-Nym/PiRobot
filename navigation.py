@@ -21,16 +21,18 @@ from ultrasonic_sensor import UltrasonicSensor
 class Navigator:
     """Avtonomna navigacija robota do ciljnega objekta."""
 
-    def __init__(self, motors, camera, sensor):
+    def __init__(self, motors, camera, sensor, led=None):
         """
         Args:
             motors: MotorController instanca
             camera: CameraVision instanca
             sensor: UltrasonicSensor instanca
+            led: LEDController instanca (opcijsko)
         """
         self.motors = motors
         self.camera = camera
         self.sensor = sensor
+        self.led = led
         self._running = False
 
     def _search_for_object(self, target_color, target_shape):
@@ -131,6 +133,8 @@ class Navigator:
             True če je dosegel objekt, False sicer.
         """
         self._running = True
+        if self.led:
+            self.led.searching_on()
 
         color_display = config.COLOR_DISPLAY_NAMES.get(target_color, target_color)
         shape_display = ""
@@ -153,12 +157,16 @@ class Navigator:
         success = self._approach_object(target_color, target_shape)
 
         self.motors.stop()
+        if self.led:
+            self.led.searching_off()
         return success
 
     def stop(self):
         """Ustavi navigacijo."""
         self._running = False
         self.motors.stop()
+        if self.led:
+            self.led.searching_off()
         print("[NAV] Navigacija ustavljena.")
 
 

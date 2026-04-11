@@ -29,6 +29,7 @@ Namen zaključne naloge je izdelava avtonomnega robota, ki na podlagi glasovnih 
 | **2x DC krtačni motor** | Pogon robota (levi in desni) |
 | **L298N motor driver** | H-bridge za krmiljenje motorjev |
 | **HC-SR04 ultrasonični senzor** | Merjenje razdalje do objektov |
+| **2x LED dioda + 2x upor 330Ω** | Vizualni indikator stanja robota |
 | **Baterija/napajalnik** | Napajanje motorjev in RPi |
 
 ### 2.2 Programska oprema (Software)
@@ -76,6 +77,15 @@ GND      (Pin 6)  ──────────── GND
 
 **POMEMBNO:** ECHO pin HC-SR04 deluje na 5V, Raspberry Pi GPIO pa na 3.3V. Napetostni delilnik z upori 1kΩ in 2kΩ zniža napetost na varnih 3.3V.
 
+```
+Raspberry Pi 5                LED indikatorji
+─────────────                ────────────────
+GPIO 25 (Pin 22) ──[330Ω]──── LED "poslušanje" (+) ──── GND
+GPIO 26 (Pin 37) ──[330Ω]──── LED "iskanje" (+) ──────── GND
+```
+
+**Vezava LED:** Anodo (daljšo nožico) poveži na upor → GPIO pin, katodo (krajšo) na GND.
+
 ### 3.2 Napajanje
 
 - Raspberry Pi 5: USB-C napajalnik (5V/5A) ali power bank
@@ -94,6 +104,7 @@ robot_project/
 ├── camera_vision.py               # Vizualno prepoznavanje (OpenCV + YOLO)
 ├── speech_recognition_module.py   # Glasovni ukazi (Google Speech API)
 ├── navigation.py                  # Navigacijska logika
+├── led_controller.py              # LED indikatorji stanja
 ├── main.py                        # Glavni program
 ├── requirements.txt               # Python knjižnice
 ├── setup.sh                       # Namestitveni skript
@@ -138,6 +149,7 @@ Podprti ukazi:
 - Slovenščina: "najdi rdečo kocko", "najdi modri trikotnik"
 - Angleščina: "find red cube", "find blue triangle"
 - Ustavitev: "ustavi", "stop"
+- Pavza/nadaljevanje: "pavza", "nadaljuj"
 
 #### navigation.py
 Razred `Navigator` izvaja avtonomno navigacijo:
@@ -147,12 +159,18 @@ Razred `Navigator` izvaja avtonomno navigacijo:
    - Uporablja P-regulator (proporcionalno krmiljenje) za korekcijo smeri
    - Če je objekt levo od centra → korigira v levo (in obratno)
    - Neprestano preverja razdaljo z ultrasoničnim senzorjem
-3. **Dotik:** Ko je razdalja manjša od 5 cm, se ustavi = objekt dotaknjen/potisnjen
+3. **Dotik:** Ko je razdalja manjša od 3.5 cm, se ustavi = objekt dotaknjen/potisnjen
+
+#### led_controller.py
+Razred `LEDController` krmili dve LED diodi za vizualni prikaz stanja robota:
+- **LED poslušanje (pin 25):** sveti ko robot čaka na glasovni ukaz
+- **LED iskanje (pin 26):** sveti med avtonomno navigacijo do objekta
 
 #### main.py
-Glavni program, ki poveže vse module. Tri načini delovanja:
-- **Normalen:** `python3 main.py` — glasovni ukazi
-- **Testni:** `python3 main.py --test` — ukazi s tipkovnico
+Glavni program, ki poveže vse module. Štirje načini delovanja:
+- **Hibridni (privzeto):** `python3 main.py` — mikrofon + tipkovnica kot rezerva
+- **Glasovni:** `python3 main.py --voice` — samo glasovni ukazi
+- **Testni:** `python3 main.py --test` — samo tipkovnica (brez mikrofona)
 - **Demo:** `python3 main.py --demo` — takoj poišče rdečo kocko
 
 ---
@@ -190,7 +208,7 @@ Glavni program, ki poveže vse module. Tri načini delovanja:
           ┌──────▼──────┐              │
           │ Obrni se    │       ┌──────▼──────┐
           │ in išči     │       │ Razdalja    │ DA  ┌──────────┐
-          │ (360°)      │       │ < 5 cm?     ├────►│ USPEH!   │
+          │ (360°)      │       │ < 3.5 cm?   ├────►│ USPEH!   │
           └──────┬──────┘       └──────┬──────┘     │ Dotaknil │
                  │                     │ NE         └──────┬───┘
           ┌──────▼──────┐              │                   │
@@ -275,10 +293,13 @@ python3 speech_recognition_module.py
 # Aktiviraj virtualno okolje
 source venv/bin/activate
 
-# Normalen zagon (glasovni ukazi)
+# Hibridni način - privzeto (mikrofon + tipkovnica kot rezerva)
 python3 main.py
 
-# Testni način (tipkovnica)
+# Samo glasovni ukazi
+python3 main.py --voice
+
+# Testni način (samo tipkovnica, brez mikrofona)
 python3 main.py --test
 
 # Demo način (takoj poišče rdečo kocko)
@@ -306,13 +327,13 @@ python3 main.py --demo --color modra --shape trikotnik
 ### 7.2 Hitrost motorjev
 
 Če se robot ne premika naravnost, prilagodi hitrosti v `config.py`:
-- `MOTOR_SPEED`: Osnovna hitrost (privzeto 60%)
-- `TURN_SPEED`: Hitrost obračanja (privzeto 50%)
+- `MOTOR_SPEED`: Osnovna hitrost (privzeto 75%)
+- `TURN_SPEED`: Hitrost obračanja (privzeto 75%)
 - `SLOW_SPEED`: Počasna hitrost za fino približevanje (privzeto 35%)
 
 ### 7.3 Razdalja dotika
 
-Prilagodi `TARGET_DISTANCE_CM` v `config.py` glede na dolžino robota (privzeto 5 cm).
+Prilagodi `TARGET_DISTANCE_CM` v `config.py` glede na dolžino robota (privzeto 3.5 cm).
 
 ---
 
@@ -327,6 +348,7 @@ Prilagodi `TARGET_DISTANCE_CM` v `config.py` glede na dolžino robota (privzeto 
 | Ne prepozna govora | Preveri internetno povezavo (Google API). |
 | Ne vidi barv pravilno | Kalibriraj HSV razpone (poglavje 7.1). |
 | Robot zavija namesto naravnost | Prilagodi hitrosti motorjev ali zamenjaj IN1/IN2 pine. |
+| LED ne sveti | Preveri vezavo (anoda na GPIO pin, katoda na GND) in upore (330Ω). |
 
 ---
 

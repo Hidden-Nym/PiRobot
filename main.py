@@ -25,6 +25,7 @@ from camera_vision import CameraVision
 from ultrasonic_sensor import UltrasonicSensor
 from speech_recognition_module import SpeechRecognizer, Command
 from navigation import Navigator
+from led_controller import LEDController
 
 
 class Robot:
@@ -42,8 +43,9 @@ class Robot:
         self.motors = MotorController()
         self.camera = CameraVision()
         self.sensor = UltrasonicSensor()
-        self.speech = SpeechRecognizer()
-        self.navigator = Navigator(self.motors, self.camera, self.sensor)
+        self.leds = LEDController()
+        self.speech = SpeechRecognizer(led=self.leds)
+        self.navigator = Navigator(self.motors, self.camera, self.sensor, led=self.leds)
 
         self._running = False
         self._paused = False
@@ -322,6 +324,7 @@ class Robot:
         self.motors.cleanup()
         self.camera.cleanup()
         self.sensor.cleanup()
+        self.leds.cleanup()
         print("Robot zaustavljen. Nasvidenje!")
 
 

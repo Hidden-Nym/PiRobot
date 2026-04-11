@@ -19,6 +19,10 @@ MOTOR_ENB = 13      # PWM za desni motor (Pin 33)
 ULTRASONIC_TRIG = 17    # Trigger pin (Pin 11)
 ULTRASONIC_ECHO = 18    # Echo pin (Pin 12) - POTREBUJE napetostni delilnik!
 
+# LED indikatorji
+LED_LISTENING = 25      # LED ko robot posluša (Pin 22)
+LED_SEARCHING = 26      # LED ko robot išče (Pin 37)
+
 # ============================================================
 # MOTOR PARAMETRI
 # ============================================================

@@ -32,9 +32,10 @@ class Command:
 class SpeechRecognizer:
     """Prepoznavanje glasovnih ukazov."""
 
-    def __init__(self):
+    def __init__(self, led=None):
         """Inicializira mikrofon in recognizer."""
         self.recognizer = sr.Recognizer()
+        self.led = led
 
         # Prilagodi za okoliški šum
         self.recognizer.dynamic_energy_threshold = True
@@ -120,11 +121,15 @@ class SpeechRecognizer:
         try:
             with sr.Microphone() as source:
                 print("[GOVOR] Poslušam... (govori ukaz)")
+                if self.led:
+                    self.led.listening_on()
                 audio = self.recognizer.listen(
                     source,
                     timeout=config.SPEECH_TIMEOUT,
                     phrase_time_limit=config.SPEECH_PHRASE_LIMIT,
                 )
+                if self.led:
+                    self.led.listening_off()
 
             # Poskusi slovenščino
             text = None
@@ -153,6 +158,8 @@ class SpeechRecognizer:
             return command
 
         except sr.WaitTimeoutError:
+            if self.led:
+                self.led.listening_off()
             print("[GOVOR] Ni zaznal govora (timeout).")
             return None
         except sr.RequestError as e:
