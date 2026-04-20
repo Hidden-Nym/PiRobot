@@ -19,6 +19,7 @@ import time
 import signal
 import select
 import threading
+import lgpio
 import config
 from motor_control import MotorController
 from camera_vision import CameraVision
@@ -52,9 +53,27 @@ class Robot:
         self._nav_thread = None
         self._last_nav_color = None
         self._last_nav_shape = None
+
+        # Gumb za ustavitev
+        self._btn_chip = lgpio.gpiochip_open(0)
+        lgpio.gpio_claim_input(self._btn_chip, config.BUTTON_STOP, lgpio.SET_PULL_NONE)
+        self._btn_thread = threading.Thread(target=self._button_monitor, daemon=True)
+        self._btn_thread.start()
+
         print("")
         print("Vsi moduli inicializirani. Robot pripravljen.")
         print("")
+
+    def _button_monitor(self):
+        """Nadzira fizični gumb — ob pritisku ustavi robota."""
+        while True:
+            if lgpio.gpio_read(self._btn_chip, config.BUTTON_STOP) == 1:
+                print("\n[ROBOT] Gumb pritisnjen — ustavitev!")
+                self._paused = False
+                self.navigator.stop()
+                self._running = False
+                time.sleep(0.3)  # Debounce: ignoriraj odbojev gumba
+            time.sleep(0.05)
 
     def _start_navigation(self, color, shape):
         """Zažene navigacijo v ločeni niti, da glavna zanka ostane odzivna."""
@@ -325,6 +344,7 @@ class Robot:
         self.camera.cleanup()
         self.sensor.cleanup()
         self.leds.cleanup()
+        lgpio.gpiochip_close(self._btn_chip)
         print("Robot zaustavljen. Nasvidenje!")
 
 

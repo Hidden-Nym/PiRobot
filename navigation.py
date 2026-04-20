@@ -70,16 +70,23 @@ class Navigator:
 
         lost_count = 0
         max_lost = 30  # Koliko zaporednih okvirjev brez objekta toleriramo
+        last_known_distance = None
 
         while self._running:
             # Preveri razdaljo
             distance = self.sensor.get_distance()
             if distance is not None:
+                last_known_distance = distance
                 print(f"[NAV] Razdalja: {distance} cm")
                 if distance <= config.TARGET_DISTANCE_CM:
                     self.motors.stop()
                     print("[NAV] CILJ DOSEŽEN! Objekt dotaknjen/potisnjen.")
                     return True
+            elif last_known_distance is not None and last_known_distance < 20:
+                # Senzor ne zazna ko smo bili pred kratkim blizu → robot je preblizu
+                self.motors.stop()
+                print("[NAV] CILJ DOSEŽEN! (senzor na meji dosega)")
+                return True
 
             # Poišči objekt
             obj = self.camera.find_object(target_color, target_shape)

@@ -23,13 +23,16 @@ ULTRASONIC_ECHO = 18    # Echo pin (Pin 12) - POTREBUJE napetostni delilnik!
 LED_LISTENING = 25      # LED ko robot posluša (Pin 22)
 LED_SEARCHING = 26      # LED ko robot išče (Pin 37)
 
+# Gumb za ustavitev
+BUTTON_STOP = 5         # Pushbutton (Pin 29) - drugi konec na GND (Pin 30)
+
 # ============================================================
 # MOTOR PARAMETRI
 # ============================================================
 
 PWM_FREQUENCY = 1000    # PWM frekvenca v Hz
-MOTOR_SPEED = 75        # Privzeta hitrost (0-100%)
-TURN_SPEED = 75         # Hitrost med obračanjem (0-100%)
+MOTOR_SPEED = 100        # Privzeta hitrost (0-100%)
+TURN_SPEED = 100         # Hitrost med obračanjem (0-100%)
 SLOW_SPEED = 35         # Počasna hitrost za fino približevanje
 
 # ============================================================
@@ -173,7 +176,7 @@ ULTRASONIC_SAMPLE_DELAY = 0.01  # Zamik med meritvami (sekunde)
 # NAVIGACIJA
 # ============================================================
 
-TARGET_DISTANCE_CM = 3.5        # Razdalja do objekta za "dotik" (cm)
+TARGET_DISTANCE_CM = 12         # Razdalja do objekta za "dotik" (cm) - HC-SR04 nezanesljiv pod 5 cm
 SEARCH_TURN_DURATION = 0.3      # Trajanje obrata med iskanjem (sekunde)
 MAX_SEARCH_ROTATIONS = 15       # Maks. št. obratov pri iskanju (360°)
 
