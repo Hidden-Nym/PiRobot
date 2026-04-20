@@ -20,6 +20,9 @@ import signal
 import select
 import threading
 import lgpio
+import cv2
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
 import config
 from motor_control import MotorController
 from camera_vision import CameraVision
@@ -54,6 +57,10 @@ class Robot:
         self._last_nav_color = None
         self._last_nav_shape = None
 
+        # Kamera stream
+        self._stream_thread = threading.Thread(target=self._start_stream, daemon=True)
+        self._stream_thread.start()
+
         # Gumb za ustavitev
         self._btn_chip = lgpio.gpiochip_open(0)
         lgpio.gpio_claim_input(self._btn_chip, config.BUTTON_STOP, lgpio.SET_PULL_NONE)
@@ -64,14 +71,61 @@ class Robot:
         print("Vsi moduli inicializirani. Robot pripravljen.")
         print("")
 
+    def _start_stream(self):
+        """Zažene HTTP stream strežnik v ozadju (deli kamero z main.py)."""
+        camera_ref = self.camera
+
+        class StreamHandler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path == '/':
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'text/html')
+                    self.end_headers()
+                    self.wfile.write(b'''<html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh">
+                        <img src="/stream" style="max-width:100%;max-height:100vh">
+                    </body></html>''')
+                elif self.path == '/stream':
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=frame')
+                    self.end_headers()
+                    try:
+                        while True:
+                            frame = camera_ref.get_annotated_frame()
+                            if frame is None:
+                                time.sleep(0.1)
+                                continue
+                            _, jpeg = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
+                            self.wfile.write(b'--frame\r\n')
+                            self.wfile.write(b'Content-Type: image/jpeg\r\n\r\n')
+                            self.wfile.write(jpeg.tobytes())
+                            self.wfile.write(b'\r\n')
+                    except (BrokenPipeError, ConnectionResetError):
+                        pass
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+
+            def log_message(self, format, *args):
+                pass  # Tiho
+
+        class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+            daemon_threads = True
+
+        try:
+            server = ThreadedHTTPServer(('0.0.0.0', config.STREAM_PORT), StreamHandler)
+            print(f"[STREAM] Live stream: http://0.0.0.0:{config.STREAM_PORT}")
+            server.serve_forever()
+        except OSError as e:
+            print(f"[STREAM] Ne morem zagnati streama: {e}")
+
     def _button_monitor(self):
         """Nadzira fizični gumb — ob pritisku ustavi robota."""
         while True:
             if lgpio.gpio_read(self._btn_chip, config.BUTTON_STOP) == 1:
-                print("\n[ROBOT] Gumb pritisnjen — ustavitev!")
+                print("\n[ROBOT] Gumb pritisnjen — prekinjam iskanje.")
                 self._paused = False
                 self.navigator.stop()
-                self._running = False
+                print("[ROBOT] Čakam na naslednji ukaz...")
                 time.sleep(0.3)  # Debounce: ignoriraj odbojev gumba
             time.sleep(0.05)
 
