@@ -46,9 +46,9 @@ SLOW_SPEED = 35         # Počasna hitrost za fino približevanje
 # ============================================================
 
 CAMERA_INDEX = 0            # USB kamera indeks (običajno 0)
-CAMERA_WIDTH = 640          # Resolucija - širina
-CAMERA_HEIGHT = 480         # Resolucija - višina
-CAMERA_FPS = 30             # Sličic na sekundo
+CAMERA_WIDTH = 1920         # Resolucija - širina
+CAMERA_HEIGHT = 1080        # Resolucija - višina
+CAMERA_FPS = 60             # Sličic na sekundo
 
 # Pozicija objekta v sliki (tretjine)
 FRAME_CENTER_MIN = 0.35    # Levi rob sredine (35% širine)
