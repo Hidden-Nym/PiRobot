@@ -77,6 +77,8 @@ class CameraVision:
         if not self.cap.isOpened():
             raise RuntimeError("Ne morem odpreti kamere! Preveri USB priklop.")
 
+        self._confirm_count = 0
+        self._confirm_target = None
         print("[KAMERA] Inicializirana.")
 
     def _detect_shape(self, contour):
@@ -249,7 +251,7 @@ class CameraVision:
             return None
         return self._enhance_frame(frame)
 
-    def find_object(self, target_color=None, target_shape=None):
+    def find_object(self, target_color=None, target_shape=None, require_confirmation=False):
         """
         Poišče ciljni objekt v trenutnem okvirju kamere.
         Najprej poskusi z OpenCV, nato z YOLO kot backup.
@@ -257,6 +259,7 @@ class CameraVision:
         Args:
             target_color: Ime barve (slovensko, npr. "rdeca")
             target_shape: Ime oblike (slovensko, npr. "trikotnik")
+            require_confirmation: Če True, vrne objekt šele ko ga vidi CONFIRM_FRAMES zaporednih okvirjev
 
         Returns:
             DetectedObject ali None če ni najden.
@@ -267,16 +270,34 @@ class CameraVision:
 
         # 1. Poskusi z OpenCV (barvni filtri + oblike)
         objects = self._find_color_objects(frame, target_color, target_shape)
+
+        if not require_confirmation:
+            if objects:
+                return objects[0]
+            if config.YOLO_ENABLED and target_color is None:
+                yolo_objects = self._find_yolo_objects(frame)
+                if yolo_objects:
+                    return yolo_objects[0]
+            return None
+
+        # Potrditveni način — zahteva CONFIRM_FRAMES zaporednih zaznav
+        current_target = (target_color, target_shape)
+        if current_target != self._confirm_target:
+            self._confirm_count = 0
+            self._confirm_target = current_target
+
         if objects:
-            return objects[0]  # Vrni največji objekt
-
-        # 2. Backup: YOLO
-        if config.YOLO_ENABLED and target_color is None:
-            yolo_objects = self._find_yolo_objects(frame)
-            if yolo_objects:
-                return yolo_objects[0]
-
-        return None
+            self._confirm_count += 1
+            if self._confirm_count >= config.CONFIRM_FRAMES:
+                return objects[0]
+            return None
+        else:
+            self._confirm_count = 0
+            if config.YOLO_ENABLED and target_color is None:
+                yolo_objects = self._find_yolo_objects(frame)
+                if yolo_objects:
+                    return yolo_objects[0]
+            return None
 
     def find_all_objects(self, target_color=None, target_shape=None):
         """Poišče vse objekte v okvirju. Vrne seznam DetectedObject."""

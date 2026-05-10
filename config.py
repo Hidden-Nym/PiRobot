@@ -57,6 +57,9 @@ FRAME_CENTER_MAX = 0.65    # Desni rob sredine (65% širine)
 # Minimalna velikost konture (v pikslih) za filtriranje šuma
 MIN_CONTOUR_AREA = 300
 
+# Koliko zaporednih okvirjev mora biti objekt viden preden ga potrdimo
+CONFIRM_FRAMES = 8
+
 # ============================================================
 # KAMERA OJAČANJE (za slabše kamere)
 # ============================================================

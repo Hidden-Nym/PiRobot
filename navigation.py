@@ -43,8 +43,8 @@ class Navigator:
         print("[NAV] Iščem objekt... Obračam se.")
 
         for i in range(config.MAX_SEARCH_ROTATIONS):
-            # Preveri kamero
-            obj = self.camera.find_object(target_color, target_shape)
+            # Preveri kamero — zahtevamo potrditev da ne reagiramo na false positive
+            obj = self.camera.find_object(target_color, target_shape, require_confirmation=True)
             if obj is not None:
                 print(f"[NAV] Objekt najden! {obj}")
                 return True
@@ -149,8 +149,8 @@ class Navigator:
             shape_display = " " + config.SHAPE_DISPLAY_NAMES.get(target_shape, target_shape)
         print(f"[NAV] Cilj: {color_display}{shape_display}")
 
-        # 1. Najprej preveri ali objekt že vidi
-        obj = self.camera.find_object(target_color, target_shape)
+        # 1. Najprej preveri ali objekt že vidi — zahtevamo potrditev
+        obj = self.camera.find_object(target_color, target_shape, require_confirmation=True)
 
         if obj is None:
             # 2. Išči z obračanjem
