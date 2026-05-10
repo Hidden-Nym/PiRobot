@@ -4,6 +4,7 @@ Uporablja OpenCV za detekcijo barv (HSV) in oblik (kontore),
 ter YOLOv8 kot backup za kompleksnejše objekte.
 """
 
+import threading
 import cv2
 import numpy as np
 import config
@@ -79,6 +80,7 @@ class CameraVision:
 
         self._confirm_count = 0
         self._confirm_target = None
+        self._lock = threading.Lock()
         print("[KAMERA] Inicializirana.")
 
     def _detect_shape(self, contour):
@@ -246,7 +248,8 @@ class CameraVision:
 
     def capture_frame(self):
         """Zajame en okvir s kamere in ojača barve. Vrne sliko ali None."""
-        ret, frame = self.cap.read()
+        with self._lock:
+            ret, frame = self.cap.read()
         if not ret:
             return None
         return self._enhance_frame(frame)
