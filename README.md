@@ -337,7 +337,7 @@ tmux attach -t robot
 Ko teče `main.py`, je live stream samodejno dostopen v brskalniku:
 
 ```
-http://192.168.1.26:8080
+http://IPAdressOdPi:8080
 ```
 
 Stream prikazuje sliko z označenimi zaznanimi objekti (zeleni pravokotniki, sredinske črte). Ni potrebno zaganjati ločenega procesa.
