@@ -99,7 +99,7 @@ class CameraVision:
             if num_vertices == 4:
                 x, y, w, h = cv2.boundingRect(approx)
                 aspect_ratio = float(w) / h
-                if 0.7 <= aspect_ratio <= 1.3:
+                if 0.5 <= aspect_ratio <= 2.0:
                     return config.SHAPE_VERTICES[4]  # kvadrat
                 else:
                     return None  # pravokotnik - ni ciljna oblika

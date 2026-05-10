@@ -123,7 +123,7 @@ Razred `MotorController` krmili dva DC motorja preko L298N H-bridge driverja. Up
 Razred `UltrasonicSensor` meri razdaljo z ultrasoničnim senzorjem HC-SR04. Pošlje ultrazvočni impulz in izmeri čas, ki ga signal potrebuje za pot do ovire in nazaj. Za večjo natančnost izvede več meritev in vrne povprečje.
 
 #### camera_vision.py
-Razred `CameraVision` izvaja vizualno prepoznavanje objektov:
+Razred `CameraVision` izvaja vizualno prepoznavanje objektov. Kamera deluje v resoluciji **1920×1080 pri 60 fps**. Razred je thread-safe — `cap.read()` je zaščiten z `threading.Lock`, da navigacijska zanka in live stream ne posežeta v kamero hkrati.
 
 **OpenCV pristop (primarni):**
 1. Zajame sliko z USB kamere
@@ -132,7 +132,7 @@ Razred `CameraVision` izvaja vizualno prepoznavanje objektov:
 4. Najde konture (obrise) v maski
 5. Za vsako konturo določi obliko s štetjem oglišč:
    - 3 oglišča → trikotnik
-   - 4 oglišča (razmerje stranic ~1:1) → kvadrat/kocka
+   - 4 oglišča (razmerje stranic 0.5–2.0) → kvadrat/kocka
    - Več kot 6 oglišč + visoka cirkularnost → krog
 
 **YOLOv8 pristop (backup):**
@@ -155,11 +155,12 @@ Podprti ukazi:
 Razred `Navigator` izvaja avtonomno navigacijo:
 
 1. **Iskanje:** Če objekt ni viden, se robot obrača na mestu in išče
-2. **Približevanje:** Ko je objekt najden, se mu približa:
+2. **Potrditev:** Ko robot med iskanjem zazna objekt, se ustavi in preveri 8 zaporednih okvirjev — objekt mora biti viden v vsaj 4 od 8, da se prepreči lažne alarme (false positive)
+3. **Približevanje:** Ko je objekt potrjen, se mu približa:
    - Uporablja P-regulator (proporcionalno krmiljenje) za korekcijo smeri
    - Če je objekt levo od centra → korigira v levo (in obratno)
    - Neprestano preverja razdaljo z ultrasoničnim senzorjem
-3. **Dotik:** Ko je razdalja manjša od 3.5 cm, se ustavi = objekt dotaknjen/potisnjen
+4. **Dotik:** Ko je razdalja manjša od 3.5 cm, se ustavi = objekt dotaknjen/potisnjen
 
 #### led_controller.py
 Razred `LEDController` krmili dve LED diodi za vizualni prikaz stanja robota:
@@ -167,11 +168,14 @@ Razred `LEDController` krmili dve LED diodi za vizualni prikaz stanja robota:
 - **LED iskanje (pin 26):** sveti med avtonomno navigacijo do objekta
 
 #### main.py
-Glavni program, ki poveže vse module. Štirje načini delovanja:
+Glavni program, ki poveže vse module. Pet načinov delovanja:
 - **Hibridni (privzeto):** `python3 main.py` — mikrofon + tipkovnica kot rezerva
 - **Glasovni:** `python3 main.py --voice` — samo glasovni ukazi
 - **Testni:** `python3 main.py --test` — samo tipkovnica (brez mikrofona)
 - **Demo:** `python3 main.py --demo` — takoj poišče rdečo kocko
+- **Ročno krmiljenje:** `python3 main.py --manual` — direktno krmiljenje motorjev s tipkovnico
+
+Live stream kamere se samodejno zažene ob vsakem zagonu `main.py` in je dostopen na `http://<IP-PI>:8080`. Stream deli isto instanco kamere z navigacijo — kamera se odpre samo enkrat.
 
 ---
 
@@ -307,6 +311,10 @@ python3 main.py --demo
 
 # Demo z določeno barvo in obliko
 python3 main.py --demo --color modra --shape trikotnik
+
+# Ročno krmiljenje s tipkovnico
+python3 main.py --manual
+# W=naprej  S=nazaj  A=levo  D=desno  Presledek=stop  Q=izhod
 ```
 
 ### 6.5 Nadzor z tmux
@@ -323,6 +331,39 @@ tmux attach -t robot
 # Izhod iz seje brez zaustavitve programa
 # Ctrl+B, nato D
 ```
+
+### 6.6 Live stream kamere
+
+Ko teče `main.py`, je live stream samodejno dostopen v brskalniku:
+
+```
+http://192.168.1.26:8080
+```
+
+Stream prikazuje sliko z označenimi zaznanimi objekti (zeleni pravokotniki, sredinske črte). Ni potrebno zaganjati ločenega procesa.
+
+### 6.7 Ročno krmiljenje
+
+Za direktno krmiljenje motorjev s tipkovnico (npr. za testiranje in navigacijo po prostoru):
+
+```bash
+# Ustavi avtomatski zagon če teče
+sudo systemctl stop robot.service
+
+# Zaženi ročno krmiljenje
+python3 main.py --manual
+```
+
+| Tipka | Akcija |
+|-------|--------|
+| `W` | naprej |
+| `S` | nazaj |
+| `A` | levo |
+| `D` | desno |
+| `Presledek` | stop |
+| `Q` | izhod |
+
+Ko končaš, znova zaženi robot z `sudo systemctl start robot.service`.
 
 ---
 
@@ -364,6 +405,9 @@ Prilagodi `TARGET_DISTANCE_CM` v `config.py` glede na dolžino robota (privzeto 
 | Ne vidi barv pravilno | Kalibriraj HSV razpone (poglavje 7.1). |
 | Robot zavija namesto naravnost | Prilagodi hitrosti motorjev ali zamenjaj IN1/IN2 pine. |
 | LED ne sveti | Preveri vezavo (anoda na GPIO pin, katoda na GND) in upore (330Ω). |
+| Stream ni dostopen na :8080 | Port je zaseden — preveri z `ss -tlnp \| grep 8080`. |
+| Kamera zasedena (samo en proces) | Ustavi `robot.service` preden zaženeš drug proces: `sudo systemctl stop robot.service`. |
+| Robot se vrti in ne najde objekta | Preveri live stream — objekt mora biti viden vsaj v 4 od 8 okvirjev med mirovanjem. |
 
 ---
 

@@ -15,6 +15,8 @@ Podprti glasovni ukazi:
 """
 
 import sys
+import tty
+import termios
 import time
 import signal
 import select
@@ -386,6 +388,76 @@ class Robot:
         else:
             print(f"\n[DEMO] NEUSPEH. {color_display} {shape_display} ni najden.")
 
+    def run_manual(self):
+        """
+        Ročno krmiljenje motorjev s tipkovnico.
+        Drži tipko za premik, spusti za stop.
+        """
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+
+        print("=" * 50)
+        print("  ROČNO KRMILJENJE")
+        print("  W = naprej    S = nazaj")
+        print("  A = levo      D = desno")
+        print("  Presledek = stop")
+        print("  Q = izhod")
+        print("=" * 50)
+        print("")
+
+        KEY_TIMEOUT = 0.15  # sekund — če ni tipke, ustavi motorje
+        current_action = None
+
+        def show(msg):
+            sys.stdout.write(f"\r  {msg}          ")
+            sys.stdout.flush()
+
+        try:
+            tty.setraw(fd)
+            while True:
+                ready = select.select([sys.stdin], [], [], KEY_TIMEOUT)[0]
+
+                if ready:
+                    key = sys.stdin.read(1).lower()
+
+                    if key in ('q', '\x03'):  # Q ali Ctrl+C
+                        break
+                    elif key == 'w':
+                        if current_action != 'forward':
+                            self.motors.forward()
+                            current_action = 'forward'
+                            show("NAPREJ")
+                    elif key == 's':
+                        if current_action != 'backward':
+                            self.motors.backward()
+                            current_action = 'backward'
+                            show("NAZAJ")
+                    elif key == 'a':
+                        if current_action != 'left':
+                            self.motors.turn_left()
+                            current_action = 'left'
+                            show("LEVO")
+                    elif key == 'd':
+                        if current_action != 'right':
+                            self.motors.turn_right()
+                            current_action = 'right'
+                            show("DESNO")
+                    elif key == ' ':
+                        self.motors.stop()
+                        current_action = None
+                        show("STOP")
+                else:
+                    # Timeout — tipka spuščena, ustavi motorje
+                    if current_action is not None:
+                        self.motors.stop()
+                        current_action = None
+                        show("STOP")
+
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            self.motors.stop()
+            print("\n\n[ROBOT] Ročno krmiljenje končano.")
+
     def shutdown(self):
         """Varno zaustavi robota in počisti vse module."""
         print("")
@@ -414,7 +486,9 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     try:
-        if "--test" in sys.argv:
+        if "--manual" in sys.argv:
+            robot.run_manual()
+        elif "--test" in sys.argv:
             robot.run_keyboard()
         elif "--voice" in sys.argv:
             robot.run()
