@@ -196,7 +196,7 @@ Glavni program, ki poveže vse module. Štirje načini delovanja:
           └──────┬──────┘
                  │ NE
           ┌──────▼──────┐
-          │ Parsaj      │
+          │ Najdi       │
           │ barvo+obliko│
           └──────┬──────┘
                  │
