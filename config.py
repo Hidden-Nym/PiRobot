@@ -55,7 +55,7 @@ FRAME_CENTER_MIN = 0.35    # Levi rob sredine (35% širine)
 FRAME_CENTER_MAX = 0.65    # Desni rob sredine (65% širine)
 
 # Minimalna velikost konture (v pikslih) za filtriranje šuma
-MIN_CONTOUR_AREA = 300
+MIN_CONTOUR_AREA = 2000
 
 # Koliko zaporednih okvirjev mora biti objekt viden preden ga potrdimo
 CONFIRM_FRAMES = 8
@@ -65,8 +65,8 @@ CONFIRM_FRAMES = 8
 # ============================================================
 
 CAMERA_ENHANCE = True           # Omogoči programsko ojačanje barv
-CAMERA_SATURATION_MULT = 2.0   # Množitelj saturacije (2.0 = dvojna)
-CAMERA_BRIGHTNESS_ADD = 30     # Dodana svetlost (0-50)
+CAMERA_SATURATION_MULT = 1.2   # Množitelj saturacije (2.0 = dvojna)
+CAMERA_BRIGHTNESS_ADD = 10     # Dodana svetlost (0-50)
 
 # ============================================================
 # HSV BARVNI RAZPONI
@@ -77,17 +77,17 @@ CAMERA_BRIGHTNESS_ADD = 30     # Dodana svetlost (0-50)
 COLOR_RANGES = {
     "rdeca": [
         # Rdeča ima dva razpona v HSV (okoli 0 in okoli 180)
-        {"lower": (0, 50, 50), "upper": (10, 255, 255)},
-        {"lower": (160, 50, 50), "upper": (179, 255, 255)},
+        {"lower": (0, 120, 80), "upper": (10, 255, 255)},
+        {"lower": (160, 120, 80), "upper": (179, 255, 255)},
     ],
     "modra": [
-        {"lower": (90, 50, 50), "upper": (130, 255, 255)},
+        {"lower": (95, 120, 80), "upper": (130, 255, 255)},
     ],
     "zelena": [
-        {"lower": (30, 50, 50), "upper": (90, 255, 255)},
+        {"lower": (35, 100, 60), "upper": (90, 255, 255)},
     ],
     "rumena": [
-        {"lower": (15, 50, 50), "upper": (35, 255, 255)},
+        {"lower": (18, 130, 100), "upper": (35, 255, 255)},
     ],
     "siva": [
         # Temno siva: nizka saturacija, nizka-srednja svetlost
