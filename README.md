@@ -410,8 +410,13 @@ Prilagodi `TARGET_DISTANCE_CM` v `config.py` glede na dolžino robota (privzeto 
 | Robot se vrti in ne najde objekta | Preveri live stream — objekt mora biti viden vsaj v 4 od 8 okvirjev med mirovanjem. |
 
 ---
+## 9. 3D model
+Model robota je bil ustvarjen iz strani prijatelja, celotni 3D model in vsi objetki za 3D print te naloge je na voljo na naslednji povezavi: [Onshape](https://cad.onshape.com/documents/a60d5d4a3005d579e79bd2cd/w/42f18cae23848ce22be4acf2/e/394f0b937c985c411e14f844?renderMode=0&uiState=6a157714d39ef09cfd410f0e)
+Model je bil v celotni naprintan na Bambu Lab A1 in A1 mini z večinoma v PLA Basic filamentu.
 
-## 9. Zaključek
+---
+
+## 10. Zaključek
 
 V zaključni nalogi je bil uspešno izdelan avtonomni robot na platformi Raspberry Pi 5, ki združuje računalniški vid (OpenCV + YOLOv8), prepoznavanje govora (Google Speech-to-Text) in avtonomno navigacijo (P-regulator). Robot je sposoben na glasovni ukaz v slovenščini ali angleščini poiskati objekt določene barve in oblike ter se do njega avtonomno premakniti.
 
