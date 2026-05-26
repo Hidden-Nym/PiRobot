@@ -1,6 +1,3 @@
-
-<img width="1280" height="640" alt="Title Card" src="https://github.com/user-attachments/assets/338dd3e1-dc9d-4137-a550-cb1b3346eeb7" />
-
 # Avtonomni robot z vizualnim prepoznavanjem in glasovnimi ukazi
 
 ## Zaključna naloga
