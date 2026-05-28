@@ -411,7 +411,7 @@ Prilagodi `TARGET_DISTANCE_CM` v `config.py` glede na dolžino robota (privzeto 
 
 ---
 ## 9. 3D model
-Model robota je bil ustvarjen iz strani prijatelja, celotni 3D model in vsi objetki za 3D print te naloge je na voljo na naslednji povezavi: [Onshape](https://cad.onshape.com/documents/a60d5d4a3005d579e79bd2cd/w/42f18cae23848ce22be4acf2/e/394f0b937c985c411e14f844?renderMode=0&uiState=6a157714d39ef09cfd410f0e)
+Model robota je bil ustvarjen iz strani prijatelja, celotni 3D model in vsi objetki za 3D print te naloge je na voljo na naslednji povezavi: [Onshape](https://cad.onshape.com/documents/a60d5d4a3005d579e79bd2cd/w/42f18cae23848ce22be4acf2/e/7d6bdfe0e8cffd18d2fe297a?renderMode=0&uiState=6a16b5bc41ef434b96fb917842f18cae23848ce22be4acf2/e/394f0b937c985c411e14f844?renderMode=0&uiState=6a157714d39ef09cfd410f0e)
 Model je bil v celotni naprintan na Bambu Lab A1 in A1 mini z večinoma v PLA Basic filamentu.
 
 ---
