@@ -1,3 +1,9 @@
+
+
+<img width="4000" height="4000" alt="Main_Body_2026-Jun-11_03-17-02PM-000_CustomizedView48525687739" src="https://github.com/user-attachments/assets/d76b51b9-33e8-422c-bd85-3b074dfc94c5" />
+
+
+
 # Avtonomni robot z vizualnim prepoznavanjem in glasovnimi ukazi
 
 ## Zaključna naloga
